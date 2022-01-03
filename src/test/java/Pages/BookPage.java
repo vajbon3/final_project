@@ -18,22 +18,21 @@ import static java.util.function.Predicate.not;
 
 public class BookPage extends BasePage {
     public void validateBooks() {
-        // get books from O'Reilly Media
-        $("#searchBox").sendKeys("O'Reilly Media");
-
+        // get all books from both API and the website
         var bookStoreCaller = (BookStoreCaller)Container.get(BookStoreCaller.class.getName());
 
-        // get books from both API and the website
-        Book[] apiBooks = Arrays.stream(bookStoreCaller.fetchBooks().books)
-                .filter(book -> book.publisher.equals("O'Reilly Media"))
-                .toArray(Book[]::new);
+        Book[] apiBooks = bookStoreCaller.fetchBooks().books;
         Book[] websiteBooks = getBooks();
 
-        System.out.println(Arrays.toString(apiBooks));
-        System.out.println(Arrays.toString(websiteBooks));
+        // get Oreilly books
+        $("#searchBox").sendKeys("O'Reilly Media");
+
+        Book[] apiBooksOreilly = filterOreilly(apiBooks);
+        Book[] websiteBooksOreilly = getBooks();
+
             // validations
-        // validate that the list is same size everywhere
-        Assert.assertEquals(apiBooks.length,websiteBooks.length);
+        // validate that the list of books of Oreilly is same size everywhere
+        Assert.assertEquals(apiBooksOreilly.length,websiteBooksOreilly.length);
 
         // validate that last book is 'Understanding ECMAScript 6' everywhere
         String validTitle = "Understanding ECMAScript 6";
@@ -51,6 +50,12 @@ public class BookPage extends BasePage {
                 .map(book -> new Book(
                         book.find(By.cssSelector(".rt-td:nth-child(2)")).getText(),
                         book.find(By.cssSelector(".rt-td:last-child")).getText()))
+                .toArray(Book[]::new);
+    }
+
+    private Book[] filterOreilly(Book[] apiBooks) {
+        return Arrays.stream(apiBooks)
+                .filter(book -> book.publisher.equals("O'Reilly Media"))
                 .toArray(Book[]::new);
     }
 }

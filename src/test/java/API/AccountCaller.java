@@ -14,7 +14,6 @@ public class AccountCaller extends Caller{
 
         // get account object from the container
         account = (Account) Container.get(Account.class.getName());
-        System.out.println(account.username);
     }
 
     public AuthorizationResponse register() {
